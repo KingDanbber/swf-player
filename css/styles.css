@@ -327,30 +327,35 @@ body {
 }
 
 .player-container {
-  flex: 1 1 auto;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  background: #000;
+  flex: 1 1 0;
+  display: block;
+  background: #111;
   position: relative;
-  min-height: 55vh;
+  min-height: 50vh;
   width: 100%;
   overflow: hidden;
 }
 
+/* Ruffle debe llenar TODO el contenedor */
 .player-container ruffle-player {
+  position: absolute !important;
+  inset: 0 !important;
   display: block !important;
   width: 100% !important;
   height: 100% !important;
-  min-height: 55vh;
-  border: none;
+  max-width: none !important;
+  max-height: none !important;
+  border: none !important;
 }
 
 .player-container ruffle-player canvas,
 .player-container canvas {
   width: 100% !important;
   height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
   object-fit: contain;
+  display: block !important;
 }
 
 /* Loading Overlay */
