@@ -4,7 +4,13 @@
 
 import { showToast, isSwfFile, formatFileSize } from './utils.js';
 import { loadSwf, loadSwfWithAssets, reloadSwf, destroyPlayer, toggleFullscreen } from './player.js';
-import { processFileList, publishAssets } from './assets.js';
+import {
+  processFileList,
+  processZipFile,
+  publishAssets,
+  ensureBuffers,
+  isZipFile,
+} from './assets.js';
 import { toggleTheme } from './theme.js';
 
 export function initUI() {
@@ -37,9 +43,12 @@ export function initUI() {
     fileInput?.click();
   });
 
-  fileInput?.addEventListener('change', (e) => {
+  fileInput?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
-    if (file) handleSingleFile(file);
+    if (file) {
+      if (isZipFile(file)) await handleZip(file);
+      else await handleSingleFile(file);
+    }
     e.target.value = '';
   });
 
@@ -90,8 +99,9 @@ export function initUI() {
 
     const file = files?.[0];
     if (file) {
-      if (isSwfFile(file)) handleSingleFile(file);
-      else showToast('Suelta un .swf o una carpeta con el juego', 'error');
+      if (isZipFile(file)) await handleZip(file);
+      else if (isSwfFile(file)) await handleSingleFile(file);
+      else showToast('Suelta un .swf, .zip o una carpeta con el juego', 'error');
     }
   });
 
@@ -152,7 +162,8 @@ async function handleFolder(fileList) {
 
   try {
     showToast('Procesando carpeta de assets...', 'info', 2500);
-    const result = await processFileList(fileList);
+    let result = await processFileList(fileList);
+    result = await ensureBuffers(result);
     await publishAssets(result.files);
     showToast(
       `Cargando ${result.mainFile.name} (${result.count} archivos)...`,
@@ -164,6 +175,37 @@ async function handleFolder(fileList) {
       mainPath: result.mainPath,
     });
     showToast('¡Listo! Assets cargados', 'success');
+  } catch (err) {
+    console.error(err);
+    showLoadError(err);
+    playerSection?.classList.add('hidden');
+    dropZone?.classList.remove('hidden');
+    destroyPlayer();
+  }
+}
+
+async function handleZip(file) {
+  const dropZone = document.getElementById('drop-zone');
+  const playerSection = document.getElementById('player-section');
+
+  dropZone?.classList.add('hidden');
+  playerSection?.classList.remove('hidden');
+
+  try {
+    showToast(`Extrayendo ${file.name} (${formatFileSize(file.size)})...`, 'info', 3000);
+    let result = await processZipFile(file);
+    result = await ensureBuffers(result);
+    await publishAssets(result.files);
+    showToast(
+      `Cargando ${result.mainFile.name} (${result.count} archivos del ZIP)...`,
+      'info',
+      2500
+    );
+    await loadSwfWithAssets({
+      mainFile: result.mainFile,
+      mainPath: result.mainPath,
+    });
+    showToast('¡Listo! ZIP cargado', 'success');
   } catch (err) {
     console.error(err);
     showLoadError(err);
