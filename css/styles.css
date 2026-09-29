@@ -147,20 +147,32 @@ body {
   color: var(--danger);
 }
 
-.btn-primary {
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.btn-primary,
+.btn-secondary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 24px;
-  background: var(--accent);
-  color: #fff;
+  padding: 12px 20px;
   border: none;
   border-radius: var(--radius-full);
   font-family: var(--font);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
 }
 
@@ -170,7 +182,20 @@ body {
   box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
 }
 
-.btn-primary:active {
+.btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active,
+.btn-secondary:active {
   transform: translateY(0);
 }
 
