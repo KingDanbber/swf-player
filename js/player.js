@@ -59,18 +59,14 @@ async function loadInternal(source) {
     const ruffle = window.RufflePlayer.newest();
     const player = ruffle.createPlayer();
 
-    const rect = container.getBoundingClientRect();
-    const w = Math.max(Math.floor(rect.width) || window.innerWidth, 320);
-    const h = Math.max(
-      Math.floor(rect.height) || Math.floor(window.innerHeight * 0.55),
-      280
-    );
-
-    player.style.width = w + 'px';
-    player.style.height = h + 'px';
+    // Llenar el contenedor al 100% (el CSS posiciona absolute)
+    player.style.position = 'absolute';
+    player.style.inset = '0';
+    player.style.width = '100%';
+    player.style.height = '100%';
     player.style.display = 'block';
-    player.style.maxWidth = '100%';
-    player.style.maxHeight = '100%';
+    player.style.maxWidth = 'none';
+    player.style.maxHeight = 'none';
 
     const baseConfig = {
       autoplay: 'on',
@@ -130,9 +126,8 @@ async function loadInternal(source) {
 
     requestAnimationFrame(() => {
       try {
-        const r = container.getBoundingClientRect();
-        player.style.width = Math.max(r.width, 320) + 'px';
-        player.style.height = Math.max(r.height, 280) + 'px';
+        player.style.width = '100%';
+        player.style.height = '100%';
         window.dispatchEvent(new Event('resize'));
       } catch (_) {}
     });
