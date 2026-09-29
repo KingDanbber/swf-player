@@ -260,7 +260,7 @@ body {
   overflow: hidden;
   box-shadow: var(--shadow-md);
   position: relative;
-  min-height: 0;
+  min-height: calc(100dvh - 140px);
 }
 
 .player-section.hidden {
@@ -302,23 +302,30 @@ body {
 }
 
 .player-container {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   background: #000;
   position: relative;
-  min-height: 280px;
+  min-height: 55vh;
+  width: 100%;
   overflow: hidden;
 }
 
-.player-container ruffle-player,
-.player-container canvas,
-.player-container object {
-  max-width: 100%;
-  max-height: 100%;
+.player-container ruffle-player {
+  display: block !important;
   width: 100% !important;
   height: 100% !important;
+  min-height: 55vh;
+  border: none;
+}
+
+.player-container ruffle-player canvas,
+.player-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
 }
 
 /* Loading Overlay */
