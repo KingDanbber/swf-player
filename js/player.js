@@ -34,46 +34,67 @@ export async function loadSwf(file) {
     const ruffle = window.RufflePlayer.newest();
     const player = ruffle.createPlayer();
 
-    player.style.width = '100%';
-    player.style.height = '100%';
-    player.style.display = 'block';
+    // Tamaño explícito para evitar pantalla negra en móvil
+    const rect = container.getBoundingClientRect();
+    const w = Math.max(Math.floor(rect.width) || window.innerWidth, 320);
+    const h = Math.max(Math.floor(rect.height) || Math.floor(window.innerHeight * 0.55), 280);
 
-    // Configuración compatible (sin forzar webgpu — falla en muchos móviles)
+    player.style.width = w + 'px';
+    player.style.height = h + 'px';
+    player.style.display = 'block';
+    player.style.maxWidth = '100%';
+    player.style.maxHeight = '100%';
+
+    // Configuración orientada a que el contenido se vea
     player.config = {
       autoplay: 'on',
       unmuteOverlay: 'hidden',
       splashScreen: false,
       contextMenu: 'on',
-      // preferredRenderer se deja en auto (null) para máxima compatibilidad
+      scale: 'showAll',
+      forceScale: true,
+      letterbox: 'on',
+      quality: 'high',
     };
 
     container.appendChild(player);
     currentPlayer = player;
 
-    // Método 1 (recomendado por Ruffle): data + swfFileName
-    // swfFileName es importante para muchos juegos AS2/AS3
     const buffer = await file.arrayBuffer();
+    const loadOptions = {
+      data: buffer,
+      swfFileName: file.name,
+      autoplay: 'on',
+      scale: 'showAll',
+      forceScale: true,
+      letterbox: 'on',
+    };
 
     try {
-      await player.load({
-        data: buffer,
-        swfFileName: file.name,
-      });
+      await player.load(loadOptions);
     } catch (dataErr) {
       console.warn('Carga por data falló, intentando Object URL...', dataErr);
-
-      // Método 2 (fallback): Object URL — más compatible en algunos navegadores
-      if (currentObjectUrl) {
-        URL.revokeObjectURL(currentObjectUrl);
-      }
+      if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
       currentObjectUrl = URL.createObjectURL(file);
-
       await player.load({
         url: currentObjectUrl,
-        // Algunos juegos necesitan el nombre
         swfFileName: file.name,
+        autoplay: 'on',
+        scale: 'showAll',
+        forceScale: true,
+        letterbox: 'on',
       });
     }
+
+    // Forzar redimensionado tras cargar (algunos móviles necesitan esto)
+    requestAnimationFrame(() => {
+      try {
+        const r = container.getBoundingClientRect();
+        player.style.width = Math.max(r.width, 320) + 'px';
+        player.style.height = Math.max(r.height, 280) + 'px';
+        window.dispatchEvent(new Event('resize'));
+      } catch (_) {}
+    });
 
     loading?.classList.add('hidden');
     return player;
