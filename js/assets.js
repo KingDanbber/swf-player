@@ -66,21 +66,25 @@ export async function publishAssets(files) {
     const type = guessType(path);
     const url = origin + ASSETS_PREFIX + path;
 
-    const response = new Response(entry.buffer.slice(0), {
-      status: 200,
-      headers: {
-        'Content-Type': type,
-        'Content-Length': String(entry.buffer.byteLength),
-        'Cache-Control': 'no-cache',
-      },
-    });
+    const headers = {
+      'Content-Type': type,
+      'Content-Length': String(entry.buffer.byteLength),
+      'Cache-Control': 'no-cache',
+    };
 
-    await cache.put(url, response);
+    // Un Response nuevo por cada put (no se puede reutilizar el body)
+    await cache.put(
+      url,
+      new Response(entry.buffer.slice(0), { status: 200, headers })
+    );
     stored++;
 
     const base = path.split('/').pop();
     if (base && base !== path) {
-      await cache.put(origin + ASSETS_PREFIX + base, response.clone());
+      await cache.put(
+        origin + ASSETS_PREFIX + base,
+        new Response(entry.buffer.slice(0), { status: 200, headers })
+      );
     }
   }
 
