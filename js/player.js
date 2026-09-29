@@ -89,8 +89,21 @@ async function loadInternal(source) {
     currentPlayer = player;
 
     if (source.kind === 'folder') {
-      // Cargar por URL virtual — las rutas relativas (lib/...) las resuelve el SW
+      await new Promise((r) => setTimeout(r, 150));
       const url = getMainSwfUrl(source.mainPath);
+      try {
+        const probe = await fetch(url, { cache: 'no-store' });
+        if (!probe.ok) {
+          throw new Error(
+            'Asset no disponible (' + probe.status + '). Recarga la página y vuelve a intentar.'
+          );
+        }
+      } catch (fetchErr) {
+        console.error('Probe falló:', fetchErr);
+        throw new Error(
+          'No se pudo servir el SWF. Recarga UNA vez (activa el Service Worker) y vuelve a abrir el ZIP/carpeta.'
+        );
+      }
       await player.load({
         url,
         ...baseConfig,

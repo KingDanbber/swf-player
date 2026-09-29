@@ -221,9 +221,15 @@ function showLoadError(err) {
   if (msg.includes('wasm') || msg.includes('failed to load ruffle')) {
     toastMsg =
       'Error WASM: recarga la página. Si persiste, comprueba la conexión (CDN de Ruffle).';
-  } else if (msg.includes('service worker') || msg.includes('sw ')) {
+  } else if (
+    msg.includes('service worker') ||
+    msg.includes('sw ') ||
+    msg.includes('failed to fetch') ||
+    msg.includes('__swf_assets__') ||
+    msg.includes('no se pudo servir')
+  ) {
     toastMsg =
-      'No se pudo activar el cargador de assets. Usa HTTPS (Vercel) y recarga.';
+      'Assets no listos. Recarga la página UNA vez y vuelve a abrir el ZIP/carpeta.';
   } else {
     const detail = err?.message ? ` (${err.message.slice(0, 55)})` : '';
     toastMsg = `No se pudo cargar${detail}`;
