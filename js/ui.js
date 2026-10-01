@@ -12,8 +12,10 @@ import {
   isZipFile,
 } from './assets.js';
 import { toggleTheme } from './theme.js';
+import { initControls, showControls, hideControls } from './controls.js';
 
 export function initUI() {
+  initControls();
   const dropZone = document.getElementById('drop-zone');
   const fileInput = document.getElementById('file-input');
   const folderInput = document.getElementById('folder-input');
@@ -119,6 +121,7 @@ export function initUI() {
 
   btnClose?.addEventListener('click', () => {
     destroyPlayer();
+    hideControls();
     playerSection?.classList.add('hidden');
     dropZone?.classList.remove('hidden');
     showToast('Juego cerrado', 'info');
@@ -143,6 +146,7 @@ async function handleSingleFile(file) {
   try {
     showToast(`Cargando ${file.name} (${formatFileSize(file.size)})...`, 'info', 2000);
     await loadSwf(file);
+    showControls();
     showToast('¡Listo!', 'success');
   } catch (err) {
     console.error(err);
@@ -174,6 +178,7 @@ async function handleFolder(fileList) {
       mainFile: result.mainFile,
       mainPath: result.mainPath,
     });
+    showControls();
     showToast('¡Listo! Assets cargados', 'success');
   } catch (err) {
     console.error(err);
@@ -205,6 +210,7 @@ async function handleZip(file) {
       mainFile: result.mainFile,
       mainPath: result.mainPath,
     });
+    showControls();
     showToast('¡Listo! ZIP cargado', 'success');
   } catch (err) {
     console.error(err);

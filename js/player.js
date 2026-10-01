@@ -82,6 +82,8 @@ async function loadInternal(source) {
 
     player.config = baseConfig;
     container.appendChild(player);
+    player.tabIndex = 0;
+    player.setAttribute('tabindex', '0');
     currentPlayer = player;
 
     if (source.kind === 'folder') {
